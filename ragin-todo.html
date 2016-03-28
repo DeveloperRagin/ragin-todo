@@ -1,0 +1,76 @@
+<!--
+@license
+Copyright (c) 2016 Glenn Vandeuren. All rights reserved.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../fetch-element/fetch-import.html">
+
+<!--
+An element providing a todo list for 'DeveloperRagin'.
+
+Example:
+
+    <ragin-todo todo-file="todo.json"></ragin-todo>
+
+@demo demo/index.html
+@hero hero.svg
+-->
+
+<dom-module id="ragin-todo">
+  <template>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+
+      paper-material {
+        padding: 1em 0.8em;
+        max-width: 1440px;
+      }
+    </style>
+
+    <template is="dom-repeat" index-as="index">
+      <paper-material elevation="1">
+        <h2>[[item.name]]</h2>
+        <h4>TODO</h4>
+        <span>[[item.todo]]</span>
+      </paper-material>
+    </template>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'ragin-todo',
+
+      properties: {
+        /**
+         * Todo's to display
+         */
+        todoFile: {
+          type: String,
+          value: 'todo.json',
+          observer: '__fetch__'
+        }
+      },
+
+      __fetch__: function(file) {
+        var template = this.$$('template[is="dom-repeat"]');
+        fetch(file)
+        .then(function(response) {
+          if (response.status >= 200 && response.status < 300) {
+            return Promise.resolve(response);
+          } else {
+            return Promise.reject(new Error(response.statusText));
+          }
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          template.items = data;
+        });
+      }
+    });
+  </script>
+</dom-module>
