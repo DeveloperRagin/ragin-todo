@@ -21,8 +21,32 @@ Example:
 <dom-module id="ragin-todo">
   <template>
     <style>
+      :root {
+        /* from https://github.com/PolymerElements/paper-styles/blob/master/shadow.html */
+        --shadow-transition: {
+          transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        };
+
+        --shadow-none: {
+          box-shadow: none;
+        };
+
+        --shadow-elevation-2dp: {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                      0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                      0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        };
+        --shadow-elevation-3dp: {
+          box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14),
+                      0 1px 8px 0 rgba(0, 0, 0, 0.12),
+                      0 3px 3px -2px rgba(0, 0, 0, 0.4);
+        };
+      }
+
       :host {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         box-sizing: border-box;
       }
 
@@ -30,10 +54,15 @@ Example:
         padding: 1em 0.8em;
         max-width: 1440px;
       }
+
+      paper-material.focused {
+        @apply(--shadow-elevation-3dp);
+        background: rgba(0, 0, 0, 0.12);
+      }
     </style>
 
     <template is="dom-repeat" index-as="index">
-      <paper-material elevation="1">
+      <paper-material key$="[[item.key]]" elevation="1" on-mouseover="_onMouseOver" on-mouseout="_onMouseOut">
         <h2>[[item.name]]</h2>
         <h4>TODO</h4>
         <span>[[item.todo]]</span>
@@ -53,11 +82,17 @@ Example:
           type: String,
           value: 'todo.json',
           observer: '__fetch__'
-        }
+        },
+
+        items: Array
       },
 
+      observers: [
+        '__itemsChanged__(items)'
+      ],
+
       __fetch__: function(file) {
-        var template = this.$$('template[is="dom-repeat"]');
+        var item;
         fetch(file)
         .then(function(response) {
           if (response.status >= 200 && response.status < 300) {
@@ -68,8 +103,43 @@ Example:
         }).then(function(response) {
           return response.json();
         }).then(function(data) {
-          template.items = data;
-        });
+          this.set('items', data);
+        }.bind(this));
+      },
+
+      __itemsChanged__: function(items) {
+        items.forEach(function(item, key) {
+          items[key].key = '#' + key;
+          this.set(items[key].key, '#' + key);
+        }.bind(this));
+        this._updateTemplate(this.items);
+      },
+
+      _updateTemplate: function(data) {
+        var template = this.$$('template[is="dom-repeat"]');
+        template.items = data;
+      },
+
+      _onMouseOver: function(event) {
+        if (event.model) {
+          var key = event.model.__data__.__key__;
+
+          var target = this.$$('paper-material[key="' + key + '"]');
+          if (!target.classList.contains('focused')) {
+            target.classList.add('focused');
+          }
+        }
+      },
+
+      _onMouseOut: function(event) {
+        if (event.model) {
+          var key = event.model.__data__.__key__;
+
+          var target = this.$$('paper-material[key="' + key + '"]');
+          if (target.classList.contains('focused')) {
+            target.classList.remove('focused');
+          }
+        }
       }
     });
   </script>
