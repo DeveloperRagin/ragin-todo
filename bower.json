@@ -1,6 +1,6 @@
 {
   "name": "ragin-todo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     "Glenn Vandeuren <vandeurenglenn@gmail.com>"
   ],
@@ -21,7 +21,8 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
     "fetch-element": "^1.1.0",
-    "paper-material": "^1.0.6"
+    "paper-material": "^1.0.6",
+    "paper-styles": "^1.1.4"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
